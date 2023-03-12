@@ -6,9 +6,8 @@ const recipesSchema = new Schema(
   {
     title: { type: String, required: true },
     user: {
-      firstName: { type: String },
-      lastName: { type: Number },
-      required: true,
+      firstName: { type: String, required: true },
+      lastName: { type: String, required: true },
     },
     picture: { type: String, required: true },
     requirements: { type: String, required: true },
@@ -16,22 +15,20 @@ const recipesSchema = new Schema(
     ingredients: [String], // (require:true) ?
 
     cookingTime: {
-      value: { type: Number },
-      unit: { type: String },
-      required: true,
+      value: { type: Number, required: true },
+      unit: { type: String, required: true },
     },
     steps: {
       step1: { type: String, required: true },
-      step2: { type: String },
-      step3: { type: String },
-      step4: { type: String },
-      step5: { type: String },
-      step6: { type: String },
-      step7: { type: String },
-      step8: { type: String },
-      step9: { type: String },
-      step10: { type: String },
-      required: true,
+      // step2: { type: String, required: true },
+      // step3: { type: String, required: true },
+      // step4: { type: String, required: true },
+      // step5: { type: String, required: true },
+      // step6: { type: String, required: true },
+      // step7: { type: String, required: true },
+      // step8: { type: String, required: true },
+      // step9: { type: String, required: true },
+      // step10: { type: String, required: true },
     },
   },
   {
