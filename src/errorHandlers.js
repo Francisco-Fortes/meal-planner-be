@@ -1,9 +1,6 @@
 export const badRequestHandler = (err, req, res, next) => {
   if (err.status === 400) {
-    res.status(400).send({
-      message:
-        "The ID cannot contain special characters or letters from g to z",
-    });
+    res.status(404).send({ message: err.message });
   } else {
     next(err);
   }
