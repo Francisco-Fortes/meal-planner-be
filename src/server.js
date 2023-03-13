@@ -9,12 +9,22 @@ import {
   notFoundErrorHandler,
   genericErrorHandler,
 } from "./errorHandlers.js";
+import createHttpError from "http-errors";
 
 const server = express();
 const port = process.env.PORT || 3001;
-
+const whitelist = [process.env.FE_PROD_URL, process.env.FE_DEV_URL];
+const corsOptions = {
+  origin: (origin, corsNext) => {
+    if (whitelist.indexOf(origin) !== -1) {
+      corsNext(null, true);
+    } else {
+      corsNext(createHttpError(400, `${origin} is not in the whitelist`));
+    }
+  },
+};
 //MIDDLEWARES
-server.use(cors());
+server.use(cors(corsOptions));
 server.use(express.json());
 
 //ENDPOINTS
