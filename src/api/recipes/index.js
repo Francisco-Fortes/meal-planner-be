@@ -4,10 +4,21 @@ import RecipesModel from "./model.js";
 
 const recipesRouter = express.Router();
 
+//Data from the FE
+const saveRecipeToDatabase = async (recipeData) => {
+  try {
+    const newRecipe = await RecipesModel(recipeData);
+    console.log(recipeData);
+    return newRecipe.save();
+  } catch (error) {
+    console.log(error);
+    throw createHttpError(500, "Could not save recipe");
+  }
+};
+
 recipesRouter.post("/", async (req, res, next) => {
   try {
-    const newRecipe = await RecipesModel(req.body);
-    newRecipe.save();
+    const newRecipe = await saveRecipeToDatabase(req.body);
     console.log(newRecipe._id);
     res.send(newRecipe._id);
   } catch (error) {
@@ -15,6 +26,19 @@ recipesRouter.post("/", async (req, res, next) => {
     next(error);
   }
 });
+
+// recipesRouter.post("/", async (req, res, next) => {
+//   try {
+//     const newRecipe = await RecipesModel(req.body);
+//     newRecipe.save();
+//     console.log(newRecipe._id);
+//     res.send(newRecipe._id);
+//   } catch (error) {
+//     console.log(error);
+//     next(error);
+//   }
+// });
+
 //GET ALL RECIPES
 recipesRouter.get("/", async (req, res, next) => {
   try {
