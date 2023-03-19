@@ -5,10 +5,12 @@ const { Schema, model } = mongoose;
 
 const usersSchema = new Schema(
   {
-    userName: { type: String, required: false },
+    firstName: { type: String },
+    lastName: { type: String },
     email: { type: String, required: true },
     password: { type: String, required: true },
     avatar: { type: String },
+    role: { type: String, enum: ["User", "Admin"], default: "User" },
   },
   {
     timestamps: true,
@@ -19,7 +21,7 @@ usersSchema.pre("save", async function (next) {
   const currentUser = this;
   if (currentUser.isModified("password")) {
     const plainPW = currentUser.password;
-    const hash = await bcrypt.hash(plainPW, 20);
+    const hash = await bcrypt.hash(plainPW, 2);
     currentUser.password = hash;
   }
   next();
@@ -36,8 +38,8 @@ usersSchema.methods.toJSON = function () {
   return user;
 };
 
-usersSchema.static("checkCredentials", async function (userName, password) {
-  const user = await this.findOne({ userName });
+usersSchema.static("checkCredentials", async function (email, password) {
+  const user = await this.findOne({ email });
   if (user) {
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (passwordMatch) {
