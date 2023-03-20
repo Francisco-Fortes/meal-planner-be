@@ -3,7 +3,7 @@ import createHttpError from "http-errors";
 import UsersModel from "./model.js";
 import { JWTAuthMiddleware } from "../users/utils/jwtAuth.js";
 import { createAccessToken } from "../users/utils/tools.js";
-
+import cloudinaryUploader from "../recipes/utils/images/imageUploader.js";
 const usersRouter = express.Router();
 
 usersRouter.get("/", async (req, res, next) => {
@@ -33,22 +33,40 @@ usersRouter.put("/me", JWTAuthMiddleware, async (req, res, next) => {
 
 usersRouter.delete("/me", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    await UsersModel.findByIdAndUpdate(req.user._id);
+    await UsersModel.findByIdAndUpdate(JWTAuthMiddleware.payload.user);
     res.status(204).send();
   } catch (error) {
     next(error);
   }
 });
 
+usersRouter.post(
+  "/me/avatar",
+  JWTAuthMiddleware,
+  cloudinaryUploader.single("avatar"),
+  async (req, res, next) => {
+    try {
+      const user = await UsersModel.findByIdAndUpdate(
+        req.user._id,
+        { avatar: req.file.path },
+        { new: true }
+      );
+      if (!user)
+        next(createError(404, `User with ID ${req.user._id} not found`));
+      res.status(201).send(user);
+    } catch (error) {
+      res.send(error);
+      next(error);
+    }
+  }
+);
+
 usersRouter.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
-
     const user = await UsersModel.checkCredentials(email, password);
-
     if (user) {
       const payload = { _id: user._id, role: user.role };
-
       const accessToken = await createAccessToken(payload);
       res.send({ accessToken });
     } else {
@@ -58,6 +76,39 @@ usersRouter.post("/login", async (req, res, next) => {
     next(error);
   }
 });
+
+usersRouter.delete("/me/logout", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const accessToken = createAccessToken({ _id: req.user._id });
+    await UsersModel.findByIdAndUpdate(
+      req.user._id,
+      { accessToken: null },
+      { new: true }
+    );
+    console.log(accessToken);
+    console.log(`User with ID ${req.user._id} successfully logged out`);
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// usersRouter.delete("/logout", JWTAuthMiddleware, async (req, res, next) => {
+//   try {
+//     const user = await UsersModel.findByIdAndUpdate(
+//       req.user._id,
+//       { accessToken: null },
+//       { new: true }
+//     );
+//     if (!user) {
+//       return next(createError(404, `User with the id ${req.user._id} not found`));
+//     }
+//     console.log(`User with ID ${req.user._id} successfully logged out`);
+//     res.status(204).send();
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 
 //GET
 usersRouter.get("/:userId", async (req, res, next) => {
