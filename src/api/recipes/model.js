@@ -13,7 +13,7 @@ const recipesSchema = new Schema(
     requirements: { type: String, required: true },
     specialRequirements: { type: String },
     ingredients: [String], // (require:true) ?
-
+    nutritionData: { type: Object },
     cookingTime: {
       value: { type: Number, required: true },
       unit: { type: String, required: true },
