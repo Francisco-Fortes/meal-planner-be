@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import axios from "axios";
 
 //WIP: Change JWT_SECRET
 export const createAccessToken = (payload) =>
@@ -20,3 +21,7 @@ export const verifyAccessToken = (token) =>
       else resolve(originalPayload);
     })
   );
+
+export const instance = axios.create({
+  baseURL: "http://localhost:3001",
+});
