@@ -5,11 +5,17 @@ const { Schema, model } = mongoose;
 
 const usersSchema = new Schema(
   {
-    firstName: { type: String },
-    lastName: { type: String },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
     email: { type: String, required: true },
     password: { type: String, required: true },
-    avatar: { type: String },
+    avatar: {
+      type: String,
+      default:
+        "https://www.google.com/imgres?imgurl=https%3A%2F%2Fwww.shareicon.net%2Fdata%2F512x512%2F2017%2F02%2F15%2F878685_user_512x512.png&tbnid=zRnYyCMWIvcVMM&vet=12ahUKEwid7OeO3fT9AhWVvyoKHdkWDMMQMygPegUIARDjAQ..i&imgrefurl=https%3A%2F%2Fwww.shareicon.net%2Fuser-male-profile-human-avatar-878685&docid=9kB7aBotiKweqM&w=512&h=512&q=image%20profile%20unisex&ved=2ahUKEwid7OeO3fT9AhWVvyoKHdkWDMMQMygPegUIARDjAQ",
+    },
+    about: { type: String },
+    recipes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Recipe" }],
     role: { type: String, enum: ["User", "Admin"], default: "User" },
   },
   {

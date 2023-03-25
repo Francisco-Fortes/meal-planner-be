@@ -5,9 +5,10 @@ const { Schema, model } = mongoose;
 const recipesSchema = new Schema(
   {
     title: { type: String, required: true },
-    user: {
-      firstName: { type: String, required: true },
-      lastName: { type: String, required: true },
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
     picture: { type: String, required: true },
     requirements: { type: String, required: true },
