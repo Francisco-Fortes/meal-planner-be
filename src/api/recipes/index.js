@@ -7,10 +7,18 @@ import cloudinaryUploader from "./utils/images/imageUploader.js";
 
 const recipesRouter = express.Router();
 
-recipesRouter.post("/", async (req, res, next) => {
+//This should be an Mod/Admin endpoint
+recipesRouter.post("/", JWTAuthMiddleware, async (req, res, next) => {
   try {
-    const newRecipe = await RecipesModel(req.body);
-    newRecipe.save();
+    const newRecipe = await RecipesModel({
+      ...req.body,
+      user: req.user._id,
+    });
+    const recipeToAdd = await UsersModel(
+      ...user,
+      recipe: recipeToAdd._id
+    )
+    await newRecipe.save();
     console.log(newRecipe._id);
     res.send(newRecipe._id);
   } catch (error) {
@@ -18,7 +26,6 @@ recipesRouter.post("/", async (req, res, next) => {
     next(error);
   }
 });
-
 //GET ALL RECIPES
 recipesRouter.get("/", async (req, res, next) => {
   try {
@@ -111,47 +118,34 @@ recipesRouter.post(
   async (req, res, next) => {
     try {
       const recipe = await RecipesModel.findById(req.params.recipeId);
-      //Implement code to preventing call the API is there is data already there
-      // if (!recipe.nutritionalData) {
-      //   next(createError(404, `Recipe with ID ${req.recipe._id} not found`));
-      // }
+      console.log(recipe.ingredients);
       if (!recipe) {
         next(createError(404, `Recipe with ID ${req.recipe._id} not found`));
       }
-      //       const ingredients = recipe.ingredients;
-      //       const url = `https://api.edamam.com/api/nutrition-data?app_id=${process.env.EDAMAM_APP_ID}&app_key=${process.env.EDAMAM_APP_KEY}`;
-      //       const response = await fetch(url, {
-      //         method: "POST",
-      //         headers: {
-      //           "Content-Type": "application/json",
-      //         },
-      //         body: JSON.stringify({ ingr: ingredients }),
-      //       });
-      //       const data = await response.json();
-      //       console.log(data);
-      //       res.send(data);
-      //     } catch (error) {
-      //       next(error);
-      //     }
-      //   }
-      // );
-
-      //WIP: Axios giving an error message
-      //AxiosError: connect ECONNREFUSED ::1:80
-      const ingredients = recipe.ingredients;
-      console.log(ingredients);
-      const response = await instance.post(
-        //Axios instance created on tools.js
-        process.env.EDAMAN_API,
-        ingredients,
-        {
-          params: {
-            app_id: process.env.EDAMAM_APP_ID,
-            app_key: process.env.EDAMAM_APP_KEY,
+      if (recipe.nutritionData.calories) {
+        res
+          .status(200)
+          .send(
+            `Recipe with ID:${recipe._id} contains the nutrition data already`
+          );
+      } else {
+        const url = `https://api.edamam.com/api/nutrition-data?app_id=${
+          process.env.EDAMAM_APP_ID
+        }&app_key=${process.env.EDAMAM_APP_KEY}&ingr=${encodeURIComponent(
+          recipe.ingredients.join("\n")
+        )}`;
+        console.log(`I am after calling the API`);
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
           },
-        }
-      );
-      res.send(response);
+        });
+        const nutritionData = await response.json();
+        recipe.nutritionData = nutritionData;
+        await recipe.save();
+        res.status(201).send(recipe.nutritionData);
+      }
     } catch (error) {
       next(error);
     }
@@ -159,6 +153,54 @@ recipesRouter.post(
 );
 
 export default recipesRouter;
+
+// recipesRouter.post(
+//   "/:recipeId/nutritionData",
+//   JWTAuthMiddleware,
+//   async (req, res, next) => {
+//     try {
+//       const recipe = await RecipesModel.findById(req.params.recipeId);
+//       console.log(recipe.ingredients);
+//       if (!recipe) {
+//         next(createError(404, `Recipe with ID ${req.recipe._id} not found`));
+//       }
+//       const url = `https://api.edamam.com/api/nutrition-data?app_id=${process.env.EDAMAM_APP_ID}&app_key=${process.env.EDAMAM_APP_KEY}`;
+//       const response = await fetch(url, {
+//         method: "GET",
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+//         body: { ingr: recipe.ingredients },
+//       });
+//       res.status(201).send(recipe.nutritionData);
+//     } catch (error) {
+//       next(error);
+//     }
+//   }
+// );
+
+//WIP: Axios giving an error message
+//AxiosError: connect ECONNREFUSED ::1:80
+//       const ingredients = recipe.ingredients;
+//       console.log(ingredients);
+//       const response = await instance.post(
+//         //Axios instance created on tools.js
+//         process.env.EDAMAN_API,
+//         ingredients,
+//         {
+//           params: {
+//             app_id: process.env.EDAMAM_APP_ID,
+//             app_key: process.env.EDAMAM_APP_KEY,
+//           },
+//         }
+//       );
+//       res.send(response);
+//     } catch (error) {
+//       next(error);
+//     }
+//   }
+// );
+
 //Data from the FE
 // const saveRecipeToDatabase = async (recipeData) => {
 //   try {
