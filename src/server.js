@@ -10,6 +10,7 @@ import {
   genericErrorHandler,
 } from "./errorHandlers.js";
 import createHttpError from "http-errors";
+import usersRouter from "./api/users/index.js";
 
 const server = express();
 const port = process.env.PORT || 3001;
@@ -22,13 +23,15 @@ const corsOptions = {
       corsNext(createHttpError(400, `${origin} is not in the whitelist`));
     }
   },
+  // credentials: true, //added because I was receiving an error on the FE
 };
 //MIDDLEWARES
 server.use(cors(corsOptions));
 server.use(express.json());
 
-//ENDPOINTS
+//ENDPOINTSS
 server.use("/recipes", recipesRouter);
+server.use("/users", usersRouter);
 
 //ERROR HANDLERS
 server.use(badRequestHandler);
