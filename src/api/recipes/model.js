@@ -10,6 +10,7 @@ const recipesSchema = new Schema(
       ref: "User",
       required: true,
     },
+    shared: { type: Boolean, required: true, default: true },
     picture: { type: String, required: true },
     requirements: { type: String, required: true },
     specialRequirements: { type: String },
