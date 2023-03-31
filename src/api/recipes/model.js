@@ -10,11 +10,10 @@ const recipesSchema = new Schema(
       ref: "User",
       required: true,
     },
+    servings: { type: Number, required: true },
     shared: { type: Boolean, required: true, default: true },
     picture: { type: String, required: true },
-    requirements: { type: String, required: true },
-    specialRequirements: { type: String },
-    ingredients: [String], // (require:true) ?
+    ingredients: { type: [String], required: true }, // (require:true) ?
     nutritionData: { type: Object },
     cookingTime: {
       value: { type: Number, required: true },
