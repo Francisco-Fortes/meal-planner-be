@@ -66,39 +66,66 @@ recipesRouter.post("/", JWTAuthMiddleware, async (req, res, next) => {
 //GET ALL RECIPES
 recipesRouter.get("/", async (req, res, next) => {
   try {
-    const allRecipes = await RecipesModel.find();
-    res.send(allRecipes);
+    if (!req.user) {
+      const sharedRecipes = await RecipesModel.find({ shared: true });
+      res.send(sharedRecipes);
+    } else {
+      const sharedRecipesAndOwn = await RecipesModel.find({
+        $or: [({ shared: true }, { author: req.user._id })],
+      });
+      res.send(sharedRecipesAndOwn);
+    }
   } catch (error) {
     next(error);
   }
 });
 
-recipesRouter.get("/:recipeId", JWTAuthMiddleware, async (req, res, next) => {
+recipesRouter.get("/:recipeId", async (req, res, next) => {
   try {
-    const recipe = await RecipesModel.findById(req.params.recipeId);
-    if (req.user._id.toString() === recipe.author.toString()) {
-      if (recipe) {
-        res.send(recipe);
-      } else {
-        next(
-          createHttpError(
-            404,
-            `Recipe with ID ${req.params.recipeId} not found`
-          )
-        );
-      }
+    const recipe = await RecipesModel.findById(req.params.recipeId).populate({
+      path: "author",
+      select: "",
+      // select: "firstName lastName",
+    });
+
+    if (recipe) {
+      res.send(recipe);
     } else {
       next(
-        createHttpError(
-          401,
-          `User with ID ${req.user._id} is not the author of the recipe`
-        )
+        createHttpError(404, `Recipe with ID ${req.params.recipeId} not found`)
       );
     }
   } catch (error) {
     next(error);
   }
 });
+
+// recipesRouter.get("/:recipeId", JWTAuthMiddleware, async (req, res, next) => {
+//   try {
+//     const recipe = await RecipesModel.findById(req.params.recipeId);
+//     if (req.user._id.toString() === recipe.author.toString()) {
+//       if (recipe) {
+//         res.send(recipe);
+//       } else {
+//         next(
+//           createHttpError(
+//             404,
+//             `Recipe with ID ${req.params.recipeId} not found`
+//           )
+//         );
+//       }
+//     } else {
+//       next(
+//         createHttpError(
+//           401,
+//           `User with ID ${req.user._id} is not the author of the recipe`
+//         )
+//       );
+//     }
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 
 recipesRouter.put("/:recipeId", async (req, res, next) => {
   try {
