@@ -16,6 +16,7 @@ const usersSchema = new Schema(
     },
     about: { type: String },
     recipes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Recipe" }],
+    planner: [{ type: mongoose.Schema.Types.ObjectId, ref: "Planner" }],
     role: { type: String, enum: ["User", "Admin"], default: "User" },
   },
   {
