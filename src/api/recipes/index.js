@@ -1,7 +1,6 @@
 import express from "express";
 import createHttpError from "http-errors";
 import { JWTAuthMiddleware } from "../users/utils/jwtAuth.js";
-import { instance } from "../users/utils/tools.js";
 import RecipesModel from "./model.js";
 import cloudinaryUploader from "./utils/images/imageUploader.js";
 import UsersModel from "../users/model.js";

@@ -31,6 +31,15 @@ usersRouter.put("/me", JWTAuthMiddleware, async (req, res, next) => {
   }
 });
 
+usersRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
+  try {
+    const user = await UsersModel.findById(req.user._id);
+    res.send(user);
+  } catch (error) {
+    next(error);
+  }
+});
+
 usersRouter.delete("/me", JWTAuthMiddleware, async (req, res, next) => {
   try {
     await UsersModel.findByIdAndUpdate(JWTAuthMiddleware.payload.user);
@@ -77,21 +86,21 @@ usersRouter.post("/login", async (req, res, next) => {
   }
 });
 
-usersRouter.delete("/me/logout", JWTAuthMiddleware, async (req, res, next) => {
-  try {
-    const accessToken = createAccessToken({ _id: req.user._id });
-    await UsersModel.findByIdAndUpdate(
-      req.user._id,
-      { accessToken: null },
-      { new: true }
-    );
-    console.log(accessToken);
-    console.log(`User with ID ${req.user._id} successfully logged out`);
-    res.status(204).send();
-  } catch (error) {
-    next(error);
-  }
-});
+// usersRouter.delete("/me/logout", JWTAuthMiddleware, async (req, res, next) => {
+//   try {
+//     const accessToken = createAccessToken({ _id: req.user._id });
+//     await UsersModel.findByIdAndUpdate(
+//       req.user._id,
+//       { accessToken: null },
+//       { new: true }
+//     );
+//     console.log(accessToken);
+//     console.log(`User with ID ${req.user._id} successfully logged out`);
+//     res.status(204).send();
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 
 // usersRouter.delete("/logout", JWTAuthMiddleware, async (req, res, next) => {
 //   try {
@@ -101,7 +110,7 @@ usersRouter.delete("/me/logout", JWTAuthMiddleware, async (req, res, next) => {
 //       { new: true }
 //     );
 //     if (!user) {
-//       return next(createError(404, `User with the id ${req.user._id} not found`));
+//       return next(createError(404, `User with ID ${req.user._id} not found`));
 //     }
 //     console.log(`User with ID ${req.user._id} successfully logged out`);
 //     res.status(204).send();
